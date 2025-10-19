@@ -77,7 +77,7 @@ The `local.env` file now includes comprehensive database configuration:
 
 ```env
 # Database Configuration
-DB_CONNECTION_STRING="mongodb+srv://socialblog:gogogo123@social-blog.urdtse4.mongodb.net/?retryWrites=true&w=majority&appName=social-blog"
+DB_CONNECTION_STRING="mongodb+srv://socialblog:<password>@social-blog.urdtse4.mongodb.net/?retryWrites=true&w=majority&appName=social-blog"
 
 # MongoDB Local Connection (for development)
 MONGO_HOST="localhost"
