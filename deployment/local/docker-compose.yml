@@ -1,0 +1,33 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: always
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=root123!@#
+      - MONGO_INITDB_DATABASE=go
+    ports:
+      - '27017:27017'
+    hostname: go-project-mongodb
+    container_name: go-project-mongodb
+
+  mongo-express:
+    image: mongo-express:1.0
+    restart: unless-stopped
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=root123!@#
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:root123!@#@go-project-mongodb:27017/
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    ports:
+      - '8081:8081'
+    hostname: go-project-mongo-express
+    container_name: go-project-mongo-express
+    depends_on:
+      - mongodb
+
+volumes:
+  mongodb-data:
