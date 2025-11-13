@@ -11,4 +11,7 @@ type Comment struct {
 	PostID          primitive.ObjectID  `bson:"post_id" json:"post_id"`
 	UserID          primitive.ObjectID  `bson:"user_id" json:"user_id"`
 	ParentCommentID *primitive.ObjectID `bson:"parent_comment_id,omitempty" json:"parent_comment_id,omitempty"`
+	User            *User               `bson:"-" json:"-"` // Not stored in DB, loaded separately
+	Post            *Post               `bson:"-" json:"-"` // Not stored in DB, loaded separately
+	ChildComments   []*Comment          `bson:"-" json:"-"` // Not stored in DB, loaded separately
 }

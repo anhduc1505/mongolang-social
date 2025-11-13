@@ -1,7 +1,14 @@
 package model
 
-// Tag represents tag collection from the database
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 type Tag struct {
-	BaseModel
-	Name string `bson:"name" json:"name"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name      string             `bson:"name" json:"name"`
+	CreatedAt *time.Time         `bson:"created_at,omitempty" json:"created_at,omitempty"`
+	UpdatedAt *time.Time         `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
 }

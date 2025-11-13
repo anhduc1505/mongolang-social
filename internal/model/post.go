@@ -13,4 +13,6 @@ type Post struct {
 	IsPublished bool                 `bson:"is_published" json:"is_published"`
 	UserID      primitive.ObjectID   `bson:"user_id" json:"user_id"`
 	TagIDs      []primitive.ObjectID `bson:"tag_ids" json:"tag_ids"`
+	User        *User                `bson:"-" json:"-"` // Not stored in DB, loaded separately
+	Tags        []*Tag               `bson:"-" json:"-"` // Not stored in DB, loaded separately
 }

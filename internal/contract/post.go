@@ -1,6 +1,9 @@
 package contract
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"golang-project/static"
@@ -24,21 +27,58 @@ type ListPostResponse struct {
 	Posts []*PostResponse `json:"posts"`
 }
 
+// ObjectIDArray is a custom type that can unmarshal from both string array and number array
+type ObjectIDArray []primitive.ObjectID
+
+// UnmarshalJSON implements custom unmarshaling for ObjectIDArray
+func (a *ObjectIDArray) UnmarshalJSON(data []byte) error {
+	var raw []interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	result := make([]primitive.ObjectID, 0, len(raw))
+	for _, item := range raw {
+		var oid primitive.ObjectID
+		var err error
+
+		switch v := item.(type) {
+		case string:
+			// Try to parse as hex string
+			oid, err = primitive.ObjectIDFromHex(v)
+			if err != nil {
+				return fmt.Errorf("invalid ObjectID string: %s", v)
+			}
+		case float64:
+			// Numbers cannot be converted to valid ObjectID
+			// ObjectID must be a 24-character hex string
+			return fmt.Errorf("tags must be ObjectID hex strings (24 characters), not numbers. Received: %v. Please use tag IDs as strings like \"507f1f77bcf86cd799439011\"", v)
+		default:
+			return fmt.Errorf("invalid tag ID type: %T, expected string", v)
+		}
+
+		result = append(result, oid)
+	}
+
+	*a = result
+	return nil
+}
+
 // CreatePostRequest represents the required and optional data needed to create a new blog post.
 type CreatePostRequest struct {
-	IsPublished bool                 `json:"is_published,omitempty" default:"false"`
-	Title       string               `json:"title" validate:"required"`
-	Body        string               `json:"body" validate:"required"`
-	Tags        []primitive.ObjectID `json:"tags,omitempty"`
+	IsPublished bool          `json:"is_published,omitempty" default:"false"`
+	Title       string        `json:"title" validate:"required"`
+	Body        string        `json:"body" validate:"required"`
+	Tags        ObjectIDArray `json:"tags,omitempty"`
 }
 
 // UpdatePostRequest represents the fields that can be updated in an existing blog post.
 type UpdatePostRequest struct {
-	ID          primitive.ObjectID   `param:"postId" swaggerignore:"true"`
-	Title       string               `json:"title,omitempty"`
-	Body        string               `json:"body,omitempty"`
-	Tags        []primitive.ObjectID `json:"tags"`
-	IsPublished bool                 `json:"is_published"`
+	ID          primitive.ObjectID `param:"postId" swaggerignore:"true"`
+	Title       string             `json:"title,omitempty"`
+	Body        string             `json:"body,omitempty"`
+	Tags        ObjectIDArray      `json:"tags"`
+	IsPublished bool               `json:"is_published"`
 }
 
 // ListPostRequest defines the filter parameters for retrieving posts.

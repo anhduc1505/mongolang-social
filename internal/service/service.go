@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	ct "golang-project/internal/contract"
@@ -22,10 +24,10 @@ type Profile interface {
 }
 
 type Tag interface {
-	Create(string) (*ct.TagResponse, error)
-	Delete(primitive.ObjectID) error
-	List() (*ct.ListTagResponse, error)
-	ListPosts(primitive.ObjectID) (*ct.ListPostResponse, error)
+	Create(ctx context.Context, name string) (*ct.TagResponse, error)
+	Delete(ctx context.Context, id primitive.ObjectID) error
+	List(ctx context.Context) (*ct.ListTagResponse, error)
+	//ListPosts(primitive.ObjectID) (*ct.ListPostResponse, error)
 }
 
 type Comment interface {

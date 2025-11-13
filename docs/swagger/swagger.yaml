@@ -1,10 +1,181 @@
 basePath: /
 definitions:
+  contract.ChangePasswordRequest:
+    properties:
+      confirm_new_password:
+        type: string
+      current_password:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
+  contract.ChangePasswordResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  contract.ChildCommentResponse:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      parent_comment_id:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/contract.ProfileResponse'
+    type: object
+  contract.CommentResponse:
+    properties:
+      child_comments:
+        items:
+          $ref: '#/definitions/contract.ChildCommentResponse'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      parent_comment_id:
+        type: string
+      post:
+        $ref: '#/definitions/contract.PostResponse'
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/contract.ProfileResponse'
+    type: object
+  contract.CreateCommentRequest:
+    properties:
+      content:
+        type: string
+      parent_comment_id:
+        $ref: '#/definitions/contract.OptionalObjectID'
+      post_id:
+        type: string
+    required:
+    - content
+    - post_id
+    type: object
+  contract.CreatePostRequest:
+    properties:
+      body:
+        type: string
+      is_published:
+        default: false
+        type: boolean
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - body
+    - title
+    type: object
+  contract.CreateTagRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
   contract.HealthCheckResponse:
     properties:
       resource:
         type: string
       status:
+        type: string
+    type: object
+  contract.ListCommentResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/contract.CommentResponse'
+        type: array
+      paging:
+        $ref: '#/definitions/contract.Paging'
+    type: object
+  contract.ListPostResponse:
+    properties:
+      posts:
+        items:
+          $ref: '#/definitions/contract.PostResponse'
+        type: array
+    type: object
+  contract.ListTagResponse:
+    properties:
+      tags:
+        items:
+          $ref: '#/definitions/contract.TagResponse'
+        type: array
+    type: object
+  contract.OptionalObjectID:
+    properties:
+      primitive.ObjectID:
+        type: string
+    type: object
+  contract.Paging:
+    properties:
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  contract.PostResponse:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_published:
+        type: boolean
+      slug:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/contract.TagResponse'
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/contract.ProfileResponse'
+    type: object
+  contract.ProfileResponse:
+    properties:
+      biography:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      profile_image:
+        type: string
+      pseudonym:
+        type: string
+      updated_at:
         type: string
     type: object
   contract.SignInRequest:
@@ -49,6 +220,50 @@ definitions:
     properties:
       user:
         $ref: '#/definitions/model.User'
+    type: object
+  contract.TagResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  contract.UpdateCommentRequest:
+    properties:
+      content:
+        type: string
+    required:
+    - content
+    type: object
+  contract.UpdatePostRequest:
+    properties:
+      body:
+        type: string
+      is_published:
+        type: boolean
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  contract.UpdateProfileRequest:
+    properties:
+      biography:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      profile_image:
+        type: string
+      pseudonym:
+        type: string
     type: object
   contract.VerifyEmailRequest:
     properties:
@@ -180,6 +395,119 @@ paths:
       summary: Verify email address
       tags:
       - authentication
+  /comments:
+    get:
+      consumes:
+      - application/json
+      description: Reader/Blogger can view all comments in the blog posts
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of posts per page
+        in: query
+        name: page_size
+        type: integer
+      - in: query
+        name: post_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ListCommentResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all comments for a post
+      tags:
+      - comment
+    post:
+      consumes:
+      - application/json
+      description: Blogger can make a new comment/ Blogger can reply to another comment
+        (with parentCMTID in request body)
+      parameters:
+      - description: Create Comment Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.CommentResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Create a new comment
+      tags:
+      - comment
+  /comments/{commentId}:
+    delete:
+      consumes:
+      - application/json
+      description: Blogger can delete their comment
+      parameters:
+      - description: comment ID
+        in: path
+        name: commentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Delete a comment
+      tags:
+      - comment
+    put:
+      consumes:
+      - application/json
+      description: Blogger can update their comment
+      parameters:
+      - description: Update Comment Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.UpdateCommentRequest'
+      - description: Comment ID
+        in: path
+        name: commentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.CommentResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: update a comment
+      tags:
+      - comment
   /health:
     get:
       consumes:
@@ -198,6 +526,374 @@ paths:
       summary: Show server liveness
       tags:
       - health
+  /posts:
+    get:
+      consumes:
+      - application/json
+      description: Reader/Blogger can view all published posts and filter by specific
+        condition (e.g. tag, author)
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Number of posts per page
+        in: query
+        name: pageSize
+        type: integer
+      - in: query
+        name: pseudonym
+        type: string
+      - in: query
+        name: tag
+        type: string
+      - in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ListPostResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: View all published posts
+      tags:
+      - post
+    post:
+      consumes:
+      - application/json
+      description: Blogger can create a new post (default as draft)
+      parameters:
+      - description: Create post request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.PostResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Create a new post
+      tags:
+      - post
+  /posts/{postId}:
+    delete:
+      consumes:
+      - application/json
+      description: Blogger can delete their own post
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Delete a post
+      tags:
+      - post
+    get:
+      consumes:
+      - application/json
+      description: Respond post detail information
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.PostResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Respond post detail information
+      tags:
+      - post
+    put:
+      consumes:
+      - application/json
+      description: Blogger can update their post content and toggle publish/draft
+        status
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Update post request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.PostResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Update an existing post
+      tags:
+      - post
+  /profile:
+    put:
+      consumes:
+      - application/json
+      description: Blogger can update their profile information
+      parameters:
+      - description: Update profile request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ProfileResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Update blogger profile
+      tags:
+      - profile
+  /profile/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: Respond profile detail information
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ProfileResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Respond profile detail information
+      tags:
+      - profile
+  /profile/change-password:
+    put:
+      consumes:
+      - application/json
+      description: Blogger can change their password
+      parameters:
+      - description: Change password request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ChangePasswordResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: Change blogger password
+      tags:
+      - profile
+  /profile/posts:
+    get:
+      description: Blogger can view all their posts. Use query parameters to filter
+        (e.g., is_published=false to view drafts).
+      parameters:
+      - description: Filter by published status
+        in: query
+        name: is_published
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ListPostResponse'
+        "401":
+          description: Unauthorized
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: View all blogger's posts
+      tags:
+      - profile
+  /profile/posts/{postId}:
+    get:
+      description: Blogger can view the detail of their own post, whether it's published
+        or draft
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.PostResponse'
+        "404":
+          description: Not Found
+          schema: {}
+      security:
+      - BearerToken: []
+      summary: View a specific blogger's post
+      tags:
+      - profile
+  /tags:
+    get:
+      consumes:
+      - application/json
+      description: Readers/Bloggers can view all blog tags
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ListTagResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all tags
+      tags:
+      - tag
+    post:
+      consumes:
+      - application/json
+      description: Create a new tag with the provided name
+      parameters:
+      - description: Create Tag Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/contract.CreateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tag created successfully
+          schema:
+            $ref: '#/definitions/contract.TagResponse'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "422":
+          description: Unprocessable entity
+          schema:
+            type: string
+      security:
+      - BearerToken: []
+      summary: Create a new tag
+      tags:
+      - tag
+  /tags/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Blogger can delete a tag that does not contain any blog
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+      security:
+      - BearerToken: []
+      summary: Delete a tag
+      tags:
+      - tag
+  /tags/{id}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Readers/Bloggers can view all blog posts belong to a particular
+        tag
+      parameters:
+      - description: Tag ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/contract.ListPostResponse'
+        "400":
+          description: Bad Request
+          schema: {}
+      summary: Get all posts for a tag
+      tags:
+      - tag
 securityDefinitions:
   BearerToken:
     in: header
