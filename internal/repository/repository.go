@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"golang-project/internal/contract"
@@ -17,22 +19,22 @@ type User interface {
 }
 
 type Tag interface {
-	Insert(*model.Tag) error
-	Read(primitive.ObjectID) (*model.Tag, error)
-	Delete(primitive.ObjectID) error
-	HasPosts(primitive.ObjectID) (bool, error)
-	Select([]primitive.ObjectID) ([]*model.Tag, error)
-	SelectPost(primitive.ObjectID) ([]*model.Post, error)
-	SelectPostTag([]primitive.ObjectID) ([]*model.PostTag, error)
-	SelectUser([]primitive.ObjectID) ([]*model.User, error)
+	Insert(ctx context.Context, tag *model.Tag) (*model.Tag, error)
+	Read(ctx context.Context, id primitive.ObjectID) (*model.Tag, error)
+	Delete(ctx context.Context, id primitive.ObjectID) error
+	HasPosts(ctx context.Context, tagID primitive.ObjectID) (bool, error)
+	Select(ctx context.Context, tagIDs []primitive.ObjectID) ([]*model.Tag, error)
+	//SelectPost(primitive.ObjectID) ([]*model.Post, error)
+	//SelectPostTag([]primitive.ObjectID) ([]*model.PostTag, error)
+	//SelectUser([]primitive.ObjectID) ([]*model.User, error)
 }
 
 type Comment interface {
-	Select(*contract.ListCommentRequest) ([]*model.Comment, int64, error)
-	Insert(*model.Comment) (*model.Comment, error)
-	Read(primitive.ObjectID) (*model.Comment, error)
-	UpdateCommentByID(primitive.ObjectID, map[string]interface{}) error
-	Delete(primitive.ObjectID) error
+	Select(ctx context.Context, req *contract.ListCommentRequest) ([]*model.Comment, int64, error)
+	Insert(ctx context.Context, comment *model.Comment) (*model.Comment, error)
+	Read(ctx context.Context, id primitive.ObjectID) (*model.Comment, error)
+	UpdateCommentByID(ctx context.Context, commentID primitive.ObjectID, updates map[string]interface{}) error
+	Delete(ctx context.Context, commentID primitive.ObjectID) error
 }
 
 type Post interface {

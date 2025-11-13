@@ -10,12 +10,11 @@ import (
 	"golang-project/internal/registry/authentication"
 	"golang-project/internal/registry/health"
 
-	// TODO: Migrate remaining services to MongoDB
-	// "golang-project/internal/registry/comment"
-	// "golang-project/internal/registry/favourite"
-	// "golang-project/internal/registry/post"
-	// "golang-project/internal/registry/profile"
-	// "golang-project/internal/registry/tag"
+	"golang-project/internal/registry/comment"
+	"golang-project/internal/registry/favourite"
+	"golang-project/internal/registry/post"
+	"golang-project/internal/registry/profile"
+	"golang-project/internal/registry/tag"
 	"golang-project/server"
 )
 
@@ -52,11 +51,10 @@ func initHealthCheckHandler(db database.Connection) handler.ResourceHandler {
 func initResourceHandlers(db database.Connection) []handler.ResourceHandler {
 	return []handler.ResourceHandler{
 		authentication.NewRegistry("/auth"),
-		// TODO: Migrate remaining services to MongoDB
-		// profile.NewRegistry("/profile", db),
-		// tag.NewRegistry("/tags", db),
-		// favourite.NewRegistry("/favorites", db),
-		// comment.NewRegistry("/comments", db),
-		// post.NewRegistry("/posts", db),
+		tag.NewRegistry("/tags", db.GetDatabase()),
+		post.NewRegistry("/posts", db.GetDatabase()),
+		profile.NewRegistry("/profile", db.GetDatabase()),
+		favourite.NewRegistry("/favorites", db.GetDatabase()),
+		comment.NewRegistry("/comments", db.GetDatabase()),
 	}
 }

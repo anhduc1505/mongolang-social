@@ -82,9 +82,9 @@ func (s *service) ChangePassword(id primitive.ObjectID, req *ct.ChangePasswordRe
 		return nil, static.ErrPasswordHashingFailed
 	}
 
-	// Update password
+	// Update password (convert to string as MongoDB stores it as string)
 	updates := map[string]any{
-		"password": hashedPassword,
+		"password": string(hashedPassword),
 	}
 
 	// Save updated password
