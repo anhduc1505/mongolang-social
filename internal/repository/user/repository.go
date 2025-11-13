@@ -62,8 +62,9 @@ func (r *repository) ReadByEmail(email string) (*model.User, error) {
 	var result model.User
 	err := r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 	if err != nil {
+		// If no user is found, return (nil, nil) to indicate absence without error.
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, errors.New("user not found")
+			return nil, nil
 		}
 		return nil, err
 	}
