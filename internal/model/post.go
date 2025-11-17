@@ -6,7 +6,7 @@ import (
 
 // Post represents post collection from the database
 type Post struct {
-	BaseModel
+	BaseModel   `bson:",inline"`
 	Title       string               `bson:"title" json:"title"`
 	Body        string               `bson:"body" json:"body"`
 	Slug        string               `bson:"slug" json:"slug"`

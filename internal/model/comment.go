@@ -6,7 +6,7 @@ import (
 
 // Comment represents comment collection from the database
 type Comment struct {
-	BaseModel
+	BaseModel       `bson:",inline"`
 	Content         string              `bson:"content" json:"content"`
 	PostID          primitive.ObjectID  `bson:"post_id" json:"post_id"`
 	UserID          primitive.ObjectID  `bson:"user_id" json:"user_id"`
