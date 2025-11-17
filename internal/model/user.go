@@ -2,7 +2,7 @@ package model
 
 // User represents user collection from the database
 type User struct {
-	BaseModel
+	BaseModel    `bson:",inline"`
 	FirstName    string `bson:"first_name" json:"first_name"`
 	LastName     string `bson:"last_name" json:"last_name"`
 	Email        string `bson:"email" json:"email"`
